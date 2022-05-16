@@ -1,4 +1,4 @@
-function plotWindowedData(cfg, MuseStruct, varargin)
+function fig = plotWindowedData(cfg, MuseStruct, varargin)
 
 % PLOTWINDOWEFDATA plots windowed data from different data types a common 
 % axis.

@@ -9,7 +9,7 @@ if ispc
     addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\SPIKY_mar_2022'))
     %     addpath (genpath('\\lexport\iss01.charpier\analyses\vn_preictal\scripts\SPIKY_Dec_2019'))
 
-    addpath \\lexport\iss01.charpier\analyses\vn_onset\fieldtrip-20200607
+    addpath \\lexport\iss01.charpier\analyses\vn_onset\fieldtrip
     
 elseif isunix
     addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/shared'))
@@ -18,7 +18,7 @@ elseif isunix
     addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/projects/onset'))
     addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/SPIKY_apr_2021'))
     %     addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_preictal/scripts/SPIKY_Dec_2019'))
-    addpath /network/lustre/iss01/charpier/analyses/vn_onset/fieldtrip-20200607
+    addpath /network/lustre/iss01/charpier/analyses/vn_onset/fieldtrip
 end
 ft_defaults
 
@@ -94,7 +94,7 @@ end
 for ielec  = 2 : 3
     
     % read settings
-    config = preictal_setparams;
+    config = onset_setparams;
 
     % read muse markers
     MuseStruct = readMuseMarkers(config{ielec}, false);
