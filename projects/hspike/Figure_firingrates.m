@@ -13,6 +13,8 @@ if isunix
     addpath(genpath('/network/lustre/iss01/charpier/analyses/stephen.whitmarsh/scripts/releaseDec2015/'));
     addpath(genpath('/network/lustre/iss01/charpier/analyses/stephen.whitmarsh/scripts/epishare-master'));
     addpath(genpath('/network/lustre/iss01/charpier/analyses/stephen.whitmarsh/scripts/SPIKY_apr_2021'))
+    addpath /network/lustre/iss01/charpier/analyses/stephen.whitmarsh/EpiCode/external/cbrewer/cbrewer
+    
 end
 
 if ispc
@@ -27,22 +29,25 @@ if ispc
     addpath(genpath('\\lexport\iss01.charpier\analyses\stephen.whitmarsh\scripts\epishare-master'));
     addpath(genpath('\\lexport\iss01.charpier\analyses\stephen.whitmarsh\scripts\SPIKY_apr_2021'));
     addpath          \\lexport\iss01.charpier\analyses\stephen.whitmarsh\scripts\MatlabImportExport_v6.0.0
+    addpath \\lexport\iss01.charpier\analyses\stephen.whitmarsh\EpiCode\external\cbrewer\cbrewer
+    
 end
 
 ft_defaults
 
 config = hspike_setparams;
 
-% load data
+%% load data
 for ipatient = 1 : 8
-    config{ipatient}.spike.name  = ["template1", "template2", "template3", "template4", "template5", "template6"];
-    SpikeTrials{ipatient}        = readSpikeTrials(config{ipatient});
-    config{ipatient}.spike.name  = ["window"];
-    SpikeStats{ipatient}         = spikeTrialStats(config{ipatient});
+%     config{ipatient}.spike.name  = ["template1", "template2", "template3", "template4", "template5", "template6"];
+%     SpikeTrials{ipatient}        = readSpikeTrials(config{ipatient});
+%     config{ipatient}.spike.name  = ["window"];
+%     SpikeStats{ipatient}         = spikeTrialStats(config{ipatient});
+%     SpikeDensity{ipatient}       = spikeTrialDensity(config{ipatient});
     config{ipatient}.LFP.name    = ["template1", "template2", "template3", "template4", "template5", "template6"];
-    SpikeDensity{ipatient}       = spikeTrialDensity(config{ipatient});
+    config{ipatient}.LFP.postfix = {'_all'};
     LFPavg{ipatient}             = readLFPavg(config{ipatient});
-    SpikeWaveforms{ipatient}     = readSpikeWaveforms(config{ipatient});
+%     SpikeWaveforms{ipatient}     = readSpikeWaveforms(config{ipatient});
 end
 
 %% rereference template average
@@ -79,6 +84,24 @@ for ipatient = 1:8
 end
 clear LFPavg
 
+%% flip polarity of rereferences patient 6
+for ipart = 1 : size(LFPavg_reref{ipatient}, 2)
+    for markername = ["template1", "template2", "template3", "template4", "template5", "template6"]
+        
+        if ~isfield(LFPavg_reref{ipatient}{ipart}, markername)
+            continue
+        end
+        if isempty(LFPavg_reref{ipatient}{ipart}.(markername))
+            continue
+        end
+        LFPavg_reref{ipatient}{ipart}.(markername).trial{1} = -LFPavg_reref{ipatient}{ipart}.(markername).trial{1};
+        
+    end
+end
+
+
+
+%% plot figures
 % configure figure
 papersize       = 1000;
 nLFPtemplate    = 6;
@@ -117,8 +140,12 @@ for ipatient = 1 : 8
             row     = 1;
             s0      = axes('Position', [hratio*(iLFPtemplate-1) + w*(spacehor/2) + rshift, 1-(vratio*row) + upshift, w, htop]);
             set(s0, 'XGrid', 'off', 'box', 'off', 'xticklabel', [], 'XColor', 'none', 'tickdir', 'out', 'Color', 'none');
-            maxchan = find(~cellfun(@isempty, strfind(LFPavg_reref{ipatient}{1}.(markername).label, config{ipatient}.align.zerochannel)), 1, 'first');
-            plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}(maxchan,:), 'k')
+            try
+                
+                maxchan = find(~cellfun(@isempty, strfind(LFPavg_reref{ipatient}{1}.(markername).label, config{ipatient}.align.zerochannel)), 1, 'first');
+                plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}(maxchan,:), 'k')
+            catch
+            end
             axis tight;
             xlim(config{ipatient}.spike.toi.(markername));
             y = ylim;
@@ -207,10 +234,15 @@ for ipatient = 1 : 8
                 end
                 
                 % label MUA/SUA
-                if contains(SpikeTrials{ipatient}{ipart}.(markername).cluster_group{itemp}, 'good')
-                    text(config{ipatient}.stats.bl.(markername)(1) + width * 0.91, y(2) * 0.95, "SUA", 'color', 'k', 'fontsize', 8);
-                else
-                    text(config{ipatient}.stats.bl.(markername)(1) + width * 0.91, y(2) * 0.95, "MUA", 'color', 'k', 'fontsize', 8); %0.9
+                if iLFPtemplate == 1
+                    
+                    x = xlim;
+                    width = x(2) - x(1);
+                    if contains(SpikeTrials{ipatient}{ipart}.(markername).cluster_group{itemp}, 'good')
+                        text(config{ipatient}.stats.bl.(markername)(1) + width * 0.81, y(2) * 0.95, "SUA", 'color', 'k', 'fontsize', 8);
+                    else
+                        text(config{ipatient}.stats.bl.(markername)(1) + width * 0.81, y(2) * 0.95, "MUA", 'color', 'k', 'fontsize', 8); %0.9
+                    end
                 end
                 
                 % add inset with waveshape
@@ -261,10 +293,9 @@ for ipatient = 1 : 8
     end % ipart
 end % ipatient
 
-
 %% normalize mean
 for ipatient = 1 : 8
-    for ipart = 1  : 3
+    for ipart = 1 : 3
         for iLFPtemplate = 1 : 6 % LFP clusters
             
             markername = sprintf('template%d', iLFPtemplate);
@@ -278,25 +309,33 @@ for ipatient = 1 : 8
             ntemplates  = size(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).label, 2);
             SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg;
             for itemp = 1 : ntemplates
+
+                if isempty(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername))
+                    continue
+                end
                 
-                if isempty(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername))
-                    continue
-                end
-                if isempty(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername))
-                    continue
-                end
-                t =  SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time >= config{ipatient}.stats.bl(1).(markername)(1) & SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time <= config{ipatient}.stats.bl(1).(markername)(2);
-                if ntemplates > 1
-                    SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(itemp, :) = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(itemp, :) ./ mean(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(itemp, t));
+                % select baseline
+                t       = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time >= config{ipatient}.stats.bl(1).(markername)(1) & SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time <= config{ipatient}.stats.bl(1).(markername)(2);
+                if ntemplates == 1
+                    temp    = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(t);
                 else
-                    SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg ./ mean(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(t));
+                    temp    = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(itemp, t);
+                end
+                temp(temp == 0) = nan;
+                bl = nanmean(temp);
+                
+                if ntemplates > 1
+                    SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(itemp, :) = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(itemp, :) ./ bl;
+                    SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(itemp, :) = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(itemp, :) ./ bl;
+                else
+                    SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg ./ bl;
                     SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm';
                 end
-                
                 if isempty(SpikeDensity{ipatient}{ipart}.stat.(markername){itemp})
                     continue
                 end
-                if SpikeDensity{ipatient}{ipart}.stat.(markername){itemp}.responsive_pos || SpikeDensity{ipatient}{ipart}.stat.(markername){itemp}.responsive_neg
+                if (SpikeDensity{ipatient}{ipart}.stat.(markername){itemp}.responsive_pos || SpikeDensity{ipatient}{ipart}.stat.(markername){itemp}.responsive_neg)
+
                     toinclude{ipatient}{ipart}.(markername) = [toinclude{ipatient}{ipart}.(markername), itemp];
                 end
             end
@@ -304,49 +343,55 @@ for ipatient = 1 : 8
     end
 end
 
+%% average over normalized averages
 for ipatient = 1 : 8
     for ipart = 1  : 3
-        SpikeDensity{ipatient}{ipart}.sdf_bar_avg = SpikeDensity{ipatient}{ipart}.sdf_bar;
-        for iLFPtemplate = 1 : 6 % LFP clusters
+
+        SpikeDensity{ipatient}{ipart}.sdf_bar_avg = [];
+        for iLFPtemplate = 1 : 6 
             markername = sprintf('template%d', iLFPtemplate);
+            
             if ~isfield(SpikeDensity{ipatient}{ipart}.sdf_bar, markername)
                 continue
             end
-            try
-                SpikeDensity{ipatient}{ipart}.psth.(markername) = rmfield(SpikeDensity{ipatient}{ipart}.psth.(markername),'cfg');
-            catch
+            if isempty(toinclude{ipatient}{ipart}.(markername))
+                continue
             end
-            try
-                SpikeDensity{ipatient}{ipart}.sdf_lin.(markername) = rmfield(SpikeDensity{ipatient}{ipart}.sdf_lin.(markername),'cfg');
-            catch
-            end
-            try
-                SpikeDensity{ipatient}{ipart}.sdf_bar.(markername) = rmfield(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername),'cfg');
-            catch
-            end     
-            try
-                for itemp = 1 : size(SpikeDensity{ipatient}{ipart}.stat.(markername), 2)
-                    SpikeDensity{ipatient}{ipart}.stat.(markername){itemp} = rmfield( SpikeDensity{ipatient}{ipart}.stat.(markername){itemp},'cfg');
-                end
-            catch
-            end
-            
-            SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername)          = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername);
-            SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).label    = {'active'};
             if size(toinclude{ipatient}{ipart}.(markername), 2) > 1
-                SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg      = mean(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(toinclude{ipatient}{ipart}.(markername), :));
-            else
-                SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg      = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg(toinclude{ipatient}{ipart}.(markername), :);
+                size(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(toinclude{ipatient}{ipart}.(markername), :))
+                SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg      = nanmean(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(toinclude{ipatient}{ipart}.(markername), :));
+            elseif toinclude{ipatient}{ipart}.(markername) ~= 1
+                SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg      = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm(toinclude{ipatient}{ipart}.(markername), :);
+            elseif toinclude{ipatient}{ipart}.(markername) == 1
+                SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg      = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).avg_norm;
             end
         end
     end
 end
 
+%% average over nights (parts)
+SpikeDensity_avg = [];
+clear temp_time
+for ipatient = 1 : 8
+    temp_time{ipatient} = [];
+    for iLFPtemplate = 1 : 6
+        markername = sprintf('template%d', iLFPtemplate);
+        temp_avg = [];
+        for ipart = 1 : 3
+            if isfield(SpikeDensity{ipatient}{ipart}.sdf_bar_avg, markername)
+                temp_avg = [temp_avg; SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg];
+                if isempty(temp_time{ipatient})
+                    temp_time{ipatient} = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time;
+                end
+            end
+        end
+        if size(temp_avg, 1) > 1
+            SpikeDensity_avg{ipatient}.(markername) = nanmean(temp_avg);
+        end
+    end
+end
 
-
-
-%% plot normalized
-
+% plot average normalized averages per template
 fig = figure('visible', true);
 set(fig, 'PaperPositionMode', 'auto');
 %     set(fig, 'position', get(0,'ScreenSize'));
@@ -358,29 +403,34 @@ papersize       = 1000;
 nLFPtemplate    = 6;
 
 for ipatient = 1 : 8
-    
-    %     for ipart = 1  : 3
-    
+       
     
     for iLFPtemplate = 1 : 6 % LFP clusters
         
         markername = sprintf('template%d', iLFPtemplate);
-        if ~isfield(SpikeDensity{ipatient}{ipart}.sdf_bar, markername) || isempty(SpikeTrials{ipatient}{ipart}.(markername)) || isempty(SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg)
+        if ~isfield(SpikeDensity_avg{ipatient}, markername) || isempty(SpikeDensity_avg{ipatient}.(markername))
             continue
         end
                 
         subplot(8, 6, iLFPtemplate + (ipatient-1) * 6);
 
         yyaxis left
-        bar(SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time, SpikeDensity{ipatient}{ipart}.sdf_bar_avg.(markername).avg, 1, 'facecolor', [127/255,127/255,127/255], 'edgecolor', 'none');
+        bar(temp_time{ipatient}, SpikeDensity_avg{ipatient}.(markername), 1, 'facecolor', [127/255,127/255,127/255], 'edgecolor', 'none');
         xticks([]);
         y = ylim;
         yticks(floor(y(end)));
-
+        
+        % labels
+        if iLFPtemplate == 1 && ipatient ==8
+            xlabel('Time');
+            ylabel('Change vs. baseline');
+        end
+         
         yyaxis right
         hold;
         % plot LFP
-        try
+        %         try
+        if ~((ipatient == 1 && iLFPtemplate == 4) || (ipatient == 4 && iLFPtemplate == 3) || (ipatient == 5 && iLFPtemplate == 4) || (ipatient == 5 && iLFPtemplate == 6))
             maxchan = find(~cellfun(@isempty, strfind(LFPavg_reref{ipatient}{ipart}.(markername).label, config{ipatient}.align.zerochannel)), 1, 'first');
             plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}(maxchan,:), 'k')
             axis tight;
@@ -388,13 +438,18 @@ for ipatient = 1 : 8
             y = ylim;
             yticks(floor(y(end)));
             xticks([]);
-        catch
+            %         catch
+            
+            axis tight;
+            xlim(config{ipatient}.spike.toi.(markername));
+            y = ylim;
+            yticks(sort([floor(y(1)), 0, floor(y(2))]));
         end
 
-        axis tight;
-        xlim(config{ipatient}.spike.toi.(markername));
-        y = ylim;
-        yticks(floor(y(end)));
+        % labels
+        if iLFPtemplate == 1 && ipatient ==8
+            ylabel('Amplitude (mV)');
+        end
         
         % baseline line
         if ipatient == 8
@@ -410,20 +465,232 @@ for ipatient = 1 : 8
             t = sprintf('500 ms');
             line([config{ipatient}.spike.toi.(markername)(end) - duration, config{ipatient}.spike.toi.(markername)(end)], [y, y], 'linewidth', 2, 'color', 'k');
             text(config{ipatient}.spike.toi.(markername)(end) * 0.99, y, t, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
-            y = ylim;
         end
         
+        fname = fullfile(config{ipatient}.imagesavedir, sprintf('firingrates_patient%d_part%d', ipatient, ipart));
+        % exportgraphics(fig, strcat(fname, '.jpg'),  'Resolution', 300);
+        exportgraphics(fig, strcat(fname, '.pdf'));
+    end 
+end % ipatient
+
+
+%% average over templates (parts)
+SpikeDensity_avg_avg = [];
+temp_time = [];
+for ipatient = 1 : 8
+    temp_avg = [];
+    for iLFPtemplate = 1 : 6
+        markername = sprintf('template%d', iLFPtemplate);
+        if isfield(SpikeDensity_avg{ipatient}, markername)
+            temp_avg = [temp_avg; SpikeDensity_avg{ipatient}.(markername)];
+            if isempty(temp_time)
+                temp_time = SpikeDensity{ipatient}{ipart}.sdf_bar.(markername).time;
+            end
+        end
+    end
+    if size(temp_avg, 1) > 1
+        SpikeDensity_avg_avg{ipatient} = nanmean(temp_avg);
+    end
+end
+
+
+
+%% plot average normalized averages per template
+
+fig = figure('visible', true);
+set(fig, 'PaperPositionMode', 'auto');
+%     set(fig, 'position', get(0,'ScreenSize'));
+%     set(fig, 'position', [20 -60  papersize papersize*sqrt(2)]);
+set(fig, 'Renderer', 'Painters');
+
+% configure figure
+papersize       = 1000;
+nLFPtemplate    = 6;
+
+for ipatient = 1 : 8      
+    
+        subplot(2, 8, ipatient);
+
+        yyaxis left
+        bar(temp_time, SpikeDensity_avg_avg{ipatient}, 1, 'facecolor', [127/255,127/255,127/255], 'edgecolor', 'none');
+        xticks([]);
+        y = ylim;
+        yticks(floor(y(end)));
         
+        % labels
+        if iLFPtemplate == 1 && ipatient ==8
+            xlabel('Time');
+            ylabel('Change vs. baseline');
+        end
         
-        %         end % iLFPtemplate
+        yyaxis right
+        hold;
+        % plot LFP
+        %         try
+        for iLFPtemplate = 1:6
+            markername = sprintf('template%d', iLFPtemplate);
+            if ~isfield(LFPavg_reref{ipatient}{ipart}, markername)
+                continue
+            end 
+            
+            %             if ~((ipatient == 1 && iLFPtemplate == 4) || (ipatient == 4 && iLFPtemplate == 3) || (ipatient == 5 && iLFPtemplate == 4) || (ipatient == 5 && iLFPtemplate == 6))
+            %             plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}', '-k')
+            
+            maxchan = find(~cellfun(@isempty, strfind(LFPavg_reref{ipatient}{ipart}.(markername).label, config{ipatient}.align.zerochannel)), 1, 'last');
+            plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}(maxchan,:), '-k')
+            %             end
+            axis tight;
+            xlim(config{ipatient}.spike.toi.(markername));
+            y = ylim;
+            yticks(floor(y(end)));
+            xticks([]);
+            axis tight;
+            y = ylim;
+            yticks(sort([floor(y(1)), 0, floor(y(2))]));
+            
+        end
+        
+        xlim(config{ipatient}.spike.toi.(markername));
+%         % labels
+%         if iLFPtemplate == 1 && ipatient ==8
+%             ylabel('Amplitude (mV)');
+%         end
+%         
+%         % baseline line
+%         if ipatient == 8
+%             y = ylim;
+%             y = y(1) + (y(2) - y(1)) * 0.05;
+%             x = xlim;
+%             width = x(2) - x(1);
+%             line(config{ipatient}.stats.bl.(markername), [y, y], 'linewidth', 2, 'color', 'k');
+%             text(config{ipatient}.stats.bl.(markername)(1) + width * 0.01, y, 'Baseline', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
+%             
+%             % time line
+%             duration = 0.5;
+%             t = sprintf('500 ms');
+%             line([config{ipatient}.spike.toi.(markername)(end) - duration, config{ipatient}.spike.toi.(markername)(end)], [y, y], 'linewidth', 2, 'color', 'k');
+%             text(config{ipatient}.spike.toi.(markername)(end) * 0.99, y, t, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+%         end
         
         %         fname = fullfile(config{ipatient}.imagesavedir, sprintf('firingrates_patient%d_part%d', ipatient, ipart));
         % exportgraphics(fig, strcat(fname, '.jpg'),  'Resolution', 300);
         %     exportgraphics(fig, strcat(fname, '.pdf'));
-    end % ipart
 end % ipatient
 
 
 
+%% average over patients
+SpikeDensity_avg_avg_avg = mean(vertcat(SpikeDensity_avg_avg{:}));
+
+clear temp
+for ipatient = 1 : 8
+    i = 1;
+
+    for ipart = 1 : 3
+    for iLFPtemplate = 1:6
+        
+        markername = sprintf('template%d', iLFPtemplate);
+        
+        if isfield(LFPavg_reref{ipatient}{ipart}, markername)
+            temp{ipatient}{i} = LFPavg_reref{ipatient}{ipart}.(markername);
+            i = i + 1;
+        end
+        
+        
+        
+    end
+    end
+    cfg = [];
+    LFPavg_avg{ipatient} = ft_appenddata(cfg, temp{ipatient}{:});
+    cfg = [];
+    cfg.avgoverrpt = 'yes';
+    LFPavg_avg{ipatient} = ft_selectdata(cfg, LFPavg_avg{ipatient});
+
+end
 
 
+cm = cbrewer('qual', 'Set2', 8);
+
+% plot average over patients
+fig = figure('visible', true);
+set(fig, 'PaperPositionMode', 'auto');
+%     set(fig, 'position', get(0,'ScreenSize'));
+%     set(fig, 'position', [20 -60  papersize papersize*sqrt(2)]);
+set(fig, 'Renderer', 'Painters');
+
+% configure figure
+papersize       = 1000;
+nLFPtemplate    = 6;
+
+hold
+set(gca, 'YScale', 'log')
+for ipatient = 1 : 8      
+    
+        yyaxis left
+%         bar(temp_time{1}, SpikeDensity_avg_avg{ipatient}, 1, 'facecolor', cm(ipatient, :), 'edgecolor', 'none', 'facealpha', 0.8);
+        plot(temp_time{1}, SpikeDensity_avg_avg{ipatient}, 'color', cm(ipatient, :));
+end
+        
+        xticks([]);
+        y = ylim;
+        yticks(floor(y(end)));
+        
+        % labels
+        if iLFPtemplate == 1 && ipatient ==8
+            xlabel('Time');
+            ylabel('Change vs. baseline');
+        end
+        
+        yyaxis right
+        hold;
+        % plot LFP
+        %         try
+        for iLFPtemplate = 1:6
+            markername = sprintf('template%d', iLFPtemplate);
+            if ~isfield(LFPavg_reref{ipatient}{ipart}, markername)
+                continue
+            end 
+            
+            %             if ~((ipatient == 1 && iLFPtemplate == 4) || (ipatient == 4 && iLFPtemplate == 3) || (ipatient == 5 && iLFPtemplate == 4) || (ipatient == 5 && iLFPtemplate == 6))
+            %             plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}', '-k')
+            
+            maxchan = find(~cellfun(@isempty, strfind(LFPavg_reref{ipatient}{ipart}.(markername).label, config{ipatient}.align.zerochannel)), 1, 'last');
+            plot(LFPavg_reref{ipatient}{ipart}.(markername).time{1}, LFPavg_reref{ipatient}{ipart}.(markername).trial{1}(maxchan,:), '-k')
+            %             end
+            axis tight;
+            xlim(config{ipatient}.spike.toi.(markername));
+            y = ylim;
+            yticks(floor(y(end)));
+            xticks([]);
+            axis tight;
+            y = ylim;
+            yticks(sort([floor(y(1)), 0, floor(y(2))]));
+            
+        end
+        
+        xlim(config{ipatient}.spike.toi.(markername));
+        % labels
+        if iLFPtemplate == 1 && ipatient ==8
+            ylabel('Amplitude (mV)');
+        end
+        
+        % baseline line
+        if ipatient == 8
+            y = ylim;
+            y = y(1) + (y(2) - y(1)) * 0.05;
+            x = xlim;
+            width = x(2) - x(1);
+            line(config{ipatient}.stats.bl.(markername), [y, y], 'linewidth', 2, 'color', 'k');
+            text(config{ipatient}.stats.bl.(markername)(1) + width * 0.01, y, 'Baseline', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'bottom');
+            
+            % time line
+            duration = 0.5;
+            t = sprintf('500 ms');
+            line([config{ipatient}.spike.toi.(markername)(end) - duration, config{ipatient}.spike.toi.(markername)(end)], [y, y], 'linewidth', 2, 'color', 'k');
+            text(config{ipatient}.spike.toi.(markername)(end) * 0.99, y, t, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'bottom');
+        end
+        
+        %         fname = fullfile(config{ipatient}.imagesavedir, sprintf('firingrates_patient%d_part%d', ipatient, ipart));
+        % exportgraphics(fig, strcat(fname, '.jpg'),  'Resolution', 300);
+        %     exportgraphics(fig, strcat(fname, '.pdf'));
+end % ipatient
