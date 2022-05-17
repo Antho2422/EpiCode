@@ -9,6 +9,10 @@ fname = fullfile(config{1}.datasavedir,'onset_slurm_job_list.txt');
 fid = fopen(fname,'w');
 
 for ielec = 1:size(config,2)
+    if isempty(config{ielec})
+        fprintf(fid,'\n');
+        continue
+    end
     
     for ipart = 1:size(config{ielec}.directorylist,2) % a voir pour retirer 
         
