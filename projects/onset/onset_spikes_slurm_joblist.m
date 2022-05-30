@@ -1,8 +1,5 @@
-function onset_spikes_slurm_joblist
+function onset_spikes_slurm_joblist(config)
 
-%find config script :
-addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\EpiCode\projects\onset'));
-config = onset_setparams;
 sc_version = '1.0.8';
 
 fname = fullfile(config{1}.datasavedir,'onset_slurm_job_list.txt');
@@ -22,7 +19,7 @@ for ielec = 1:size(config,2)
  %       filename    = [config{ielec}.prefix,'p',num2str(ipart),'-multifile-',config{ielec}.circus.channel{1},'.ncs']; 
         filename    = 'SpykingCircus.params';
         
-        dirname     = sprintf('/network/lustre/iss01/charpier/analyses/vn_onset/data/%s/%s',subjdir,partdir);
+        dirname     = sprintf('/network/lustre/iss02/charpier/analyses/vn_onset/data/%s/%s',subjdir,partdir);
 %        dirname     = sprintf('/network/lustre/iss01/charpier/analyses/vn_onset/data/%s/%s',subjdir);
         
         %code to launch SC

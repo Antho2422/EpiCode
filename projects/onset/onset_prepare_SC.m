@@ -4,20 +4,20 @@ function onset_prepare_SC
 
 restoredefaultpath
 if ispc
-    addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\EpiCode\shared'))
-    addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\EpiCode\external'))
-    addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\EpiCode\templates'))
-    addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\EpiCode\projects\onset'))
-    addpath (genpath('\\lexport\iss01.charpier\analyses\vn_onset\SPIKY_mar_2022'))
-    addpath \\lexport\iss01.charpier\analyses\vn_onset\fieldtrip
+    addpath (genpath('\\l2export\iss02.charpier\analyses\vn_onset\EpiCode\shared'))
+    addpath (genpath('\\l2export\iss02.charpier\analyses\vn_onset\EpiCode\external'))
+    addpath (genpath('\\l2export\iss02.charpier\analyses\vn_onset\EpiCode\templates'))
+    addpath (genpath('\\l2export\iss02.charpier\analyses\vn_onset\EpiCode\projects\onset'))
+    addpath (genpath('\\l2export\iss02.charpier\analyses\vn_onset\SPIKY_mar_2022'))
+    addpath \\l2export\iss02.charpier\analyses\vn_onset\fieldtrip
     
 elseif isunix
-    addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/shared'))
-    addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/external'))
-    addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/templates'))
-    addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/EpiCode/projects/onset'))
-    addpath (genpath('/network/lustre/iss01/charpier/analyses/vn_onset/SPIKY_apr_2021'))
-    addpath /network/lustre/iss01/charpier/analyses/vn_onset/fieldtrip
+    addpath (genpath('/network/lustre/iss02/charpier/analyses/vn_onset/EpiCode/shared'))
+    addpath (genpath('/network/lustre/iss02/charpier/analyses/vn_onset/EpiCode/external'))
+    addpath (genpath('/network/lustre/iss02/charpier/analyses/vn_onset/EpiCode/templates'))
+    addpath (genpath('/network/lustre/iss02/charpier/analyses/vn_onset/EpiCode/projects/onset'))
+    addpath (genpath('/network/lustre/iss02/charpier/analyses/vn_onset/SPIKY_apr_2021'))
+    addpath /network/lustre/iss02/charpier/analyses/vn_onset/fieldtrip
 end
 ft_defaults
 
@@ -26,12 +26,12 @@ ipart = 1;
 
 %% prepare data for Spyking Circus
 % write a new joblist for the cluster
-onset_spikes_slurm_joblist
+onset_spikes_slurm_joblist(config);
 
 
 
-for ipatient = 1:5 %1:size(config, 2)  % à définir (1 : n si plusieurs patients)
-    
+for ipatient = 12:13%1:size(config, 2)  % à définir (1 : n si plusieurs patients)
+
     if isempty(config{ipatient})
         continue
     end
