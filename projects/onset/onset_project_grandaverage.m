@@ -107,8 +107,14 @@ for ipatient = 1:size(config, 2)
             end
             x = [t_lvfa t_crise_end];
             y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
-            patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
+            patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'y', 'facealpha', 0.5);
             
+            %mark the baseline duration
+                    t_baseline = [-10 -5];
+                    x = t_baseline;
+                    y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
+                    patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
+           
             %or plot a vertical line
             
             %plot each spike time
@@ -142,7 +148,6 @@ end
 %% rasterplot de toutes les units de chaque groupe
 toilist = [-20, 20; -5, 5; config{1}.spike.toi.CriseStart]';
 bar_size = 0.5;
-typemarker = "patch"; % type of marker for the end of seizure "line" or "patch"
 
 for toi = toilist
     for igroup = ["simple", "slowwave"]
@@ -189,18 +194,14 @@ for toi = toilist
                     end
                     x = [t_lvfa t_crise_end];
                     y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
-                   
-                    %patch 
-                    if typemarker == "patch"
-                        patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
-                    
-                    % Vertical line
-                    else typemarker == "line"
-                        x = [t_crise_end t_crise_end];
-                        plot(x, y, "--b");
-                    end
+                    patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'y', 'facealpha', 0.5);
 
-                    
+                    %mark the baseline duration
+                    t_baseline = [-10 -5];
+                    x = t_baseline;
+                    y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
+                    patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
+                   
                    %plot each spike timing
                     for i_time = SpikeTrials{ipatient}{ipart}.CriseStart.time{i_unit}(sel)
                         if i_time < toi(1) || i_time > toi(2)
@@ -304,7 +305,13 @@ for i_period = ["baseline", "lvfa"]
                 end
                 x = [t_lvfa t_crise_end];
                 y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
-                patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
+                patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'y', 'facealpha', 0.5);
+
+                %mark the baseline duration
+                    t_baseline = [-10 -5];
+                    x = t_baseline;
+                    y = [iplot-(1-bar_size)/2, iplot+bar_size+(1-bar_size)/2];
+                    patch('XData', [x(1) x(2) x(2) x(1)], 'YData', [y(1) y(1) y(2) y(2)], 'edgecolor', 'none', 'facecolor', 'b', 'facealpha', 0.5);
                 
                 %or plot a vertical line
                 
@@ -844,7 +851,7 @@ for ipatient = 1:size(config,2)
                 xlabel('Time (s)');
                 ylabel('Freq (Hz)');
                 
-                ft_pimpplot(gcf, jet, true);
+                ft_pimpplot(gcf, jet, true, false);
                 title([]);
                 set(gca, 'tickdir', 'out', 'fontsize', 15);
                 
@@ -1000,8 +1007,8 @@ end
 %% plot toutes les electrodes d'un patient 
 toilist = {[-20 20], [-40 30], "lvfa"};
 h.all = 600;
-ipatient = 1;
-patname = erase(config{ipatient}.prefix, "_mHaT2-");
+ipatient = 13;
+patname = erase(config{ipatient}.prefix, "_m2mCi-");
 
 for toi = toilist
     iplot = 0;

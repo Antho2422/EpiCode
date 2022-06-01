@@ -34,7 +34,7 @@ MuseStruct = readMuseMarkers(config{ipatient}, true);
 LFP = readLFP(config{ipatient}, MuseStruct, true);
 
 %comput FFT
-FFTtrials(config{ipatient}, LFP, true);
+FFTtrials(config{ipatient}, true, LFP);
 
 %read spike data
 SpikeRaw = readSpikeRaw_Phy(config{ipatient}, true);

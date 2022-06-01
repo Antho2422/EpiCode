@@ -110,7 +110,7 @@ config{1}.imagesavedir        = fullfile(imagesavedir, 'pat_03046_1482_Crise1_mH
 config{1}.prefix              = 'pat_03046_1482_Crise1_mHaT2-';                     %patient name Must end by "-". namepatient-
 config{1}.rawdir              = fullfile(rootpath_data,'pat_03046_1482','eeg');             %path to patient data
 config{1}.directorylist{1}    = {'03046_2021-07-11_05-52','03046_2021-07-11_07-52'};                    %list of folders to analyse
-config{1}.LFP.channel         = {'_HaT2_1','_HaT2_2','_HmT2_1','_HmT2_2','_Tpol_1','_Tpol_2'};  
+config{1}.LFP.channel         = {'_HaT2_1'};%,'_HaT2_2','_HmT2_1','_HmT2_2','_TPol_1','_TPol_2'};  
 %config{1}.LFP.resamplefs      = 250;
 
 config{1}.circus.channel      = {'mHaT2_4'};       %name of the first electrode
@@ -444,7 +444,7 @@ config{13}.circus.params.filtering.common_ground = '{1:1}';% reref : {group_chan
 config{13}.circus.params.clustering.nb_repeats   = '10';
 config{13}.circus.params.clustering.max_elts     = '20000';
 
-config{13}.LFP.channel         = {'_2mCi_1'};       %name the macro contact in the SOZ
+config{13}.LFP.channel         = {'_2mCi_2','_m2mCi_6'};       %name the macro contact in the SOZ
 
 %config{13}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
 config{13}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
