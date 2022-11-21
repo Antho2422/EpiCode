@@ -43,12 +43,12 @@ configcommon.spikewaveform.nspikes                  = 1000; %100000; %1000; 'all
 configcommon.circus.correct_chunk{1}                = false;
 
 configcommon.name                           = {'CriseStart', 'PreCrise_5s', 'PreCrise_10s', 'Crise_5s', 'LVFA', 'window'};
-configcommon.LFP.name                       = {'CriseStart', 'PreCrise_5s', 'PreCrise_10s', 'Crise_5s', 'LVFA'};
+configcommon.LFP.name                       = {'CriseStart', 'PreCrise_5s', 'PreCrise_10s', 'Crise_5s', 'LVFA','Crise'};
 configcommon.FFT.name                       = {'CriseStart', 'PreCrise_5s', 'PreCrise_10s', 'Crise_5s', 'LVFA'};
 configcommon.spike.name                     = configcommon.name;
 
-configcommon.window.length                  = 5;
-configcommon.window.overlap                 = 0;
+configcommon.window.length.window           = 5;
+configcommon.window.overlap.window          = 0;
 configcommon.FFT.foi.window                 = 1:40;
 
 configcommon.muse.startmarker.CriseStart    = "CriseStart";
@@ -91,10 +91,20 @@ configcommon.spike.toi.LVFA           = [0, 0];
 configcommon.spike.pad.LVFA           = 0;  
 configcommon.FFT.foi.LVFA             = 1:40;
 
+configcommon.muse.startmarker.Crise    = "CriseStart";
+configcommon.muse.endmarker.Crise      = "CriseEnd";
+configcommon.epoch.toi.Crise           = [-10, 10];
+configcommon.epoch.pad.Crise           = 0;
+configcommon.spike.toi.Crise           = [-10, 10];  
+configcommon.spike.pad.Crise           = 0;  
+configcommon.FFT.foi.Crise             = 1:40;
+
 %LFP rereferencing in readLFP.m :
 configcommon.LFP.reref                = 'yes';
 configcommon.LFP.rerefmethod          = 'bipolar';
+configcommon.LFP.resamplefs           = 320;
 
+configcommon.spikewaveform.lpfilter   = 'yes';
 configcommon.spikewaveform.lpfreq     = 3000;
 
 configcommon.TFR.raw.zlim = "maxmin";
@@ -236,88 +246,95 @@ config{5}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en comp
 config{5}.bad.time_from_begin = 1700; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
 
 %% patient 6
-% config{6}                     = configcommon;
-% config{6}.datasavedir         = datasavedir;       %path where to save MuseStruct data
-% config{6}.imagesavedir        = fullfile(imagesavedir, 'pat_02599_1057_Crise2_mHaT2');
-% config{6}.prefix              = 'pat_02599_1057_Crise2_mHaT2-';                                                        %patient name. Must end by "-". namepatient-
-% config{6}.rawdir              = fullfile(rootpath_data,'pat_02599_1057','eeg');                       %path to patient data
-% config{6}.directorylist{1}    = {'02599_2018-04-25_13-24','02599_2018-04-25_15-24'};                                               %list of folders to analyse
-% config{6}.circus.channel      = {'mHaT2_6'};       %name of the first electrode
-% config{6}.circus.refchan      = '';
-% config{6}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
-% config{6}.circus.hpfilter     = 'no'; % hp before writing data for SC, does not change the hp of SC
-% config{6}.circus.hpfreq       = 0; % even when not using[]
-% config{6}.circus.postfix      = []; % after using circus-gui-matlab's SAVE number
-% 
-% config{6}.circus.params.detection.spike_thresh  = '6';
-% config{6}.circus.params.clustering.nb_repeats   = '10';
-% config{6}.circus.params.clustering.max_elts     = '20000';
-% 
-% config{6}.LFP.channel         = {'_HaT2_'};       %name the macro contact in the SOZ
-% 
-% config{6}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
-% config{6}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
-% config{6}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
-% config{6}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
-% config{6}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
-% config{6}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
-% 
-% %% patient 7
-% config{7}                     = configcommon;
-% config{7}.datasavedir         = datasavedir;       %path where to save MuseStruct data
-% config{7}.imagesavedir        = fullfile(imagesavedir, 'pat_02614_1073_Crise9_mTNmi');
-% config{7}.prefix              = 'pat_02614_1073_Crise9_mTNmi-';                                                        %patient name. Must end by "-". namepatient-
-% config{7}.rawdir              = fullfile(rootpath_data,'pat_02614_1073','eeg');                       %path to patient data
-% config{7}.directorylist{1}    = {'02614_2018-06-25_10-47'};                                               %list of folders to analyse
-% config{7}.circus.channel      = {'mTNmi_5','mTNmi_7','mTNmi_8'};       %name of the first electrode
-% config{7}.circus.reref        = 'no';
-% config{7}.circus.refchan      = '';
-% config{7}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
-% config{7}.circus.hpfilter     = 'no'; % hp before writing data for SC, does not change the hp of SC
-% config{7}.circus.hpfreq       = 0; % even when not using
-% config{7}.circus.postfix      = []; % after using circus-gui-matlab's SAVE number
-% 
-% config{7}.circus.params.detection.spike_thresh  = '8';
-% config{7}.circus.params.clustering.nb_repeats   = '10';
-% config{7}.circus.params.clustering.max_elts     = '20000';
-% 
-% config{7}.LFP.channel         = {'_TNmi_'};       %name the macro contact in the SOZ
-% 
-% config{7}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
-% config{7}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
-% config{7}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
-% config{7}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
-% config{7}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
-% config{7}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
-% 
-% %% patient 8
-% config{8}                     = configcommon;
-% config{8}.datasavedir         = datasavedir;       %path where to save MuseStruct data
-% config{8}.imagesavedir        = fullfile(imagesavedir, 'pat_02614_1073_Crise11a_mTNmi');
-% config{8}.prefix              = 'pat_02614_1073_Crise11a_mTNmi-';                                                        %patient name. Must end by "-". namepatient-
-% config{8}.rawdir              = fullfile(rootpath_data,'pat_02614_1073','eeg');                       %path to patient data
-% config{8}.directorylist{1}    = {'02614_2018-06-25_14-47','02614_2018-06-25_16-47'};                                               %list of folders to analyse
-% config{8}.circus.channel      = {'mTNmi_5','mTNmi_7','mTNmi_8'};       %name of the first electrode
-% config{8}.circus.reref        = 'no';
-% config{8}.circus.refchan      = '';
-% config{8}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
-% config{8}.circus.hpfilter     = 'no'; % hp before writing data for SC, does not change the hp of SC
-% config{8}.circus.hpfreq       = 0; % even when not using
-% config{8}.circus.postfix      = []; % after using circus-gui-matlab's SAVE number
-% 
-% config{8}.circus.params.detection.spike_thresh  = '7.5';
-% config{8}.circus.params.clustering.nb_repeats   = '10';
-% config{8}.circus.params.clustering.max_elts     = '20000';
-% 
-% config{8}.LFP.channel         = {'_HaT2_'};       %name the macro contact in the SOZ
-% 
-% config{8}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
-% config{8}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
-% config{8}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
-% config{8}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
-% config{8}.bad.sample_list     = 1; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
-% config{8}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
-% %% patient 9
+config{6}                     = configcommon;
+config{6}.group               = 'slowwave';
+config{6}.triallist           = 1;
+
+config{6}.datasavedir         = datasavedir;       %path where to save MuseStruct data
+config{6}.imagesavedir        = fullfile(imagesavedir, 'pat_02222_0667_Crise1_HmT1');
+config{6}.prefix              = 'pat_02222_0667_Crise1_HmT1-';                                                        %patient name. Must end by "-". namepatient-
+config{6}.rawdir              = fullfile(rootpath_data,'pat_02222_0667','eeg');                       %path to patient data
+config{6}.directorylist{1}    = {'02222_2015-02-10_07-47'};                                               %list of folders to analyse
+config{6}.circus.channel      = {'mHaT1_1'};       %name of the first electrode
+config{6}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
+
+config{6}.circus.params.detection.spike_thresh  = '6';
+config{6}.circus.params.clustering.nb_repeats   = '10';
+config{6}.circus.params.clustering.max_elts     = '20000';
+
+config{6}.LFP.channel         = {'_HmT1_1'};       %name the macro contact in the SOZ
+
+config{6}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
+config{6}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
+config{6}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
+config{6}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
+config{6}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
+config{6}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
+
+%% patient 7
+config{7}                     = configcommon;
+config{7}.triallist           = 1;
+
+config{7}.datasavedir         = datasavedir;       %path where to save MuseStruct data
+config{7}.imagesavedir        = fullfile(imagesavedir, 'pat_03128_1591_CriseStim_Ha2D');
+config{7}.prefix              = 'pat_03128_1591_CriseStim_Ha2D-';                                                        %patient name. Must end by "-". namepatient-
+config{7}.rawdir              = fullfile(rootpath_data,'pat_03128_1591','eegmicromed');                       %path to patient data
+config{7}.directorylist{1}    = {'EEG_534061'};                                               %list of folders to analyse
+config{7}.circus.channel      = {'Ha2g1'};       %name of the first electrode
+config{7}.circus.reref        = 'no';
+config{7}.circus.refchan      = '';
+config{7}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
+config{7}.circus.hpfilter     = 'no'; % hp before writing data for SC, does not change the hp of SC
+config{7}.circus.hpfreq       = 0; % even when not using
+config{7}.circus.postfix      = []; % after using circus-gui-matlab's SAVE number
+
+config{7}.circus.params.detection.spike_thresh  = '8';
+config{7}.circus.params.clustering.nb_repeats   = '10';
+config{7}.circus.params.clustering.max_elts     = '20000';
+
+config{7}.LFP.channel         = {'Ha2g1'};       %name the macro contact in the SOZ
+
+config{7}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
+config{7}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
+config{7}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
+config{7}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
+config{7}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
+config{7}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
+
+
+ %% patient 8
+config{8}                     = configcommon;
+config{8}.triallist           = 1;
+
+config{8}.datasavedir         = datasavedir;       %path where to save MuseStruct data
+config{8}.imagesavedir        = fullfile(imagesavedir, 'pat_03128_1591_CriseStim_Ha2g');
+config{8}.prefix              = 'pat_03128_1591_CriseStim_Ha2g-';                                                        %patient name. Must end by "-". namepatient-
+config{8}.rawdir              = fullfile(rootpath_data,'pat_03128_1591','eeg');                       %path to patient data
+config{8}.directorylist{1}    = {'03128_2022-03-11_13-14'};                                               %list of folders to analyse
+config{8}.circus.channel      = {'mHa2g_2'};       %name of the first electrode
+config{8}.circus.reref        = 'no';
+config{8}.circus.refchan      = '';
+config{8}.circus.outputdir    = fullfile(rootpath_analysis, 'data', 'SpykingCircus');
+config{8}.circus.hpfilter     = 'no'; % hp before writing data for SC, does not change the hp of SC
+config{8}.circus.hpfreq       = 0; % even when not using
+config{8}.circus.postfix      = []; % after using circus-gui-matlab's SAVE number
+
+config{8}.circus.params.detection.spike_thresh  = '8';
+config{8}.circus.params.clustering.nb_repeats   = '10';
+config{8}.circus.params.clustering.max_elts     = '20000';
+
+config{8}.LFP.channel         = {'_mHa2g_2'};       %name the macro contact in the SOZ
+config{8}.LFP.lpfilter        = 3000;
+config{8}.LFP.hpfilter        = 300;
+
+config{8}.seizure_index       = 'last'; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
+config{8}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end
+config{8}.bad.markerEnd       = 'end'; % BAD jusque fin du fichier
+config{8}.bad.dir_list        = 'last'; %nouveau marqueur BAD sur dernier des 2 fichiers 
+config{8}.bad.sample_list     = 'last'; %dernier marqueur crise END pris en compte (en cas de multiple crise sur un même fichier)
+config{8}.bad.time_from_begin = 1800; %début à +60s de crise END (pour rfaire spike sorting sur crise et post critique immédiat)
+
+%% patient 9
 % config{9}                     = configcommon;
 % config{9}.datasavedir         = datasavedir;       %path where to save MuseStruct data
 % config{9}.imagesavedir        = fullfile(imagesavedir, 'pat_02614_1073_Crise11b_mTNmi');
@@ -523,7 +540,9 @@ config{16}.circus.params.detection.spike_thresh  = '8';
 config{16}.circus.params.clustering.nb_repeats   = '10';
 config{16}.circus.params.clustering.max_elts     = '20000';
 
-config{16}.LFP.channel         = {'_1pNs_1'};       %name the macro contact in the SOZ
+config{16}.LFP.channel          = {'_1pNs_1'};       %name the macro contact in the SOZ
+config{16}.TFR.raw.zlim         = [0 800];
+config{16}.TFR.blcorrected.zlim = [0 800];
 
 %config{16}.seizure_index       = 'last' ; %Optional. index of the seizure to analyze, on the LAST dir. can be 'last' (default)
 config{16}.bad.markerStart     = 'CriseEnd'; %BAD à partir crise end

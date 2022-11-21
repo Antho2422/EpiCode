@@ -175,7 +175,7 @@ if do_plot
         ylabel('trough-peak (ms)');
         zlabel('peak asymetry');
         
-        figname = fullfile(config{1}.imagesavedir, 'Classification_in_pn', imethod);
+        figname = fullfile(config{1}.imagesavedir, 'test_classification_IN_PN', imethod);
         savefigure_own(fig, figname, 'png', 'pdf', 'fig', 'close');
         
     end

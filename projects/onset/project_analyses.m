@@ -1,4 +1,4 @@
-function onset_project_grandaverage
+function project_analyses
 
 restoredefaultpath
 if ispc
@@ -23,24 +23,13 @@ elseif isunix
 end
 ft_defaults
 
-config = onset_setparams;
+% à modif avec la nouvelle orga de Brieg
 
-ipart = 1;
+config = onset_setparams;
 
 %% load precomputed data
 
 for ipatient = 1:size(config, 2)
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %TOREMOVE :
-    if ismember(ipatient,[6 7 8])
-        config{ipatient} = [];
-        continue
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
     if isempty(config{ipatient})
         continue
     end

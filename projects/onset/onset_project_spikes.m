@@ -37,7 +37,7 @@ LFP = readLFP(config{ipatient}, MuseStruct, true);
 FFTtrials(config{ipatient}, true, LFP);
 
 %read spike data
-SpikeRaw = readSpikeRaw_Phy(config{ipatient}, true);
+SpikeRaw = readSpikeRaw_Phy(config{ipatient}, false);
 
 % add (sliding) timewindow
 [config{ipatient}, MuseStruct] = addSlidingWindows(config{ipatient}, MuseStruct);
@@ -51,4 +51,3 @@ spikeTrialStats(config{ipatient}, SpikeTrials, true);
 SpikeWaveforms = readSpikeWaveforms(config{ipatient}, SpikeRaw, true);
 
 spikeWaveformStats(config{ipatient}, SpikeWaveforms, true);
-clear SpikeWaveforms

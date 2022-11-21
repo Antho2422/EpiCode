@@ -11,7 +11,7 @@ for ielec = 1:size(config,2)
         continue
     end
     
-    for ipart = 1:size(config{ielec}.directorylist,2) % a voir pour retirer 
+    for ipart = 1:size(config{ielec}.directorylist,2) 
         
         %get patient's information
         subjdir     = config{ielec}.prefix(1:end-1);
